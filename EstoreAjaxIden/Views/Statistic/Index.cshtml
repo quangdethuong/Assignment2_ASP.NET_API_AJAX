@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using Microsoft.Extensions.DependencyInjection;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form nhập ngày</title>
+    <style>
+        /* CSS để tùy chỉnh giao diện bảng */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        th {
+            background-color: #4895EF;
+            color: white;
+        }
+
+        /* CSS để căn giữa nội dung trong ô input */
+        input[type="date"] {
+            text-align: center;
+        }
+
+        /* CSS để căn giữa nút Gửi */
+        button {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+    <form>
+        <label for="startDate">Ngày bắt đầu:</label>
+        <input type="date" id="startDate" name="startDate" required>
+
+        <label for="endDate">Ngày kết thúc:</label>
+        <input type="date" id="endDate" name="endDate" required>
+
+        <button type="button" onclick="getStatisticalData()" class="btn btn-primary">Send</button>
+    </form>
+
+    <!-- Bảng để hiển thị dữ liệu từ API -->
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Member ID</th>
+                <th>Order Date</th>
+                <th>Require Date</th>
+                <th>Shipped Date</th>
+                <th>Freight</th>
+            </tr>
+        </thead>
+        <tbody id="data-body">
+            <!-- Dữ liệu từ API sẽ được hiển thị ở đây -->
+        </tbody>
+    </table>
+
+    <script>
+        function getStatisticalData() {
+            var startDate = document.getElementById("startDate").value;
+            var endDate = document.getElementById("endDate").value;
+            var apiUrl = "https://localhost:5001/api/Order/GetOrdersStatistic?startDate=" + startDate + "&endDate=" + endDate;
+
+            // Sử dụng AJAX để gọi API và xử lý kết quả
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", apiUrl, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var responseData = JSON.parse(xhr.responseText);
+                    updateTable(responseData);
+                }
+            };
+            xhr.send();
+        }
+
+        function updateTable(data) {
+            var tableBody = document.getElementById("data-body");
+            tableBody.innerHTML = ""; // Xóa nội dung cũ trong bảng
+
+            data.forEach(function (item) {
+                var row = tableBody.insertRow(-1);
+                row.insertCell(0).textContent = item.orderId;
+                row.insertCell(1).textContent = item.memberId;
+                row.insertCell(2).textContent = item.orderDate;
+                row.insertCell(3).textContent = item.requiredDate;
+                row.insertCell(4).textContent = item.shippedDate;
+                row.insertCell(5).textContent = item.freight;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+﻿﻿@using Microsoft.AspNetCore.Identity;
+@using Microsoft.Extensions.DependencyInjection;
+@{
+    var userManage = Context.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+    var signInManage = Context.RequestServices.GetRequiredService<SignInManager<IdentityUser>>();
+    var currentUser = userManage.GetUserAsync(User).Result;
+}
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h1 {
+        color: #007BFF;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+    }
+
+    thead {
+        background-color: #007BFF;
+        color: white;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Member ID</th>
+                <th>Order Date</th>
+                <th>Require Date</th>
+                <th>Shipped Date</th>
+                <th>Freight</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var memberId = @Json.Serialize(currentUser.Id);
+            var apiUrl = "https://localhost:5001/api/Order/GetOrdersByMemberId/" + memberId;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Lấy thẻ tbody của bảng
+                    var tableBody = document.getElementById("table-body");
+
+                    // Duyệt qua dữ liệu và thêm mỗi mục vào bảng
+                    data.forEach(function (order) {
+                        var row = tableBody.insertRow();
+                        var cell1 = row.insertCell(0);
+                        cell1.innerHTML = order.orderId;
+                        var cell2 = row.insertCell(1);
+                        cell2.innerHTML = order.memberId;
+                        var cell3 = row.insertCell(2);
+                        cell3.innerHTML = order.orderDate;
+                        var cell4 = row.insertCell(3);
+                        cell4.innerHTML = order.requiredDate;
+                        var cell5 = row.insertCell(4);
+                        cell5.innerHTML = order.shippedDate;
+                        var cell6 = row.insertCell(5);
+                        cell6.innerHTML = order.freight;
+                    });
+                })
+                .catch(error => {
+                    console.log("Lỗi: " + error);
+                });
+        });
+    </script>
+</body>
+</html>

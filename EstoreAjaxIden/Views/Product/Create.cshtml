@@ -1,0 +1,105 @@
+﻿﻿
+
+<div class="container-fluid">
+    <h2>Product List</h2>
+    <form id="createProductForm">
+        <div class="form-group">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" name="productName" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="categoryId">Category:</label>
+            <select id="categoryDropdown" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+            <label for="weight">Weight:</label>
+            <input type="number" id="weight" name="weight" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="unitInStock">Quantity:</label>
+            <input type="number" id="unitInStock" name="unitInStock" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="unitPrice">Unit Price:</label>
+            <input type="number" id="unitPrice" name="unitPrice" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+
+    </form>
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Function to show all products (your existing function)
+
+        // Function to load categories and populate the dropdown
+        function loadCategories() {
+            $.ajax({
+                url: "https://localhost:5001/api/Category",
+                type: "get",
+                success: function (data) {
+                    var categoryDropdown = $("#categoryDropdown");
+
+                    // Clear existing options
+                    categoryDropdown.empty();
+
+                    // Populate the dropdown with category names and IDs
+                    data.forEach(function (category) {
+                        categoryDropdown.append(
+                            $("<option>")
+                                .val(category.categoryId)
+                                .text(category.categoryName)
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                    alert("Error loading categories.");
+                }
+            });
+        }
+
+        // Load categories when the page loads
+        loadCategories();
+
+        $("#createProductForm").submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            var formData = {
+                categoryId: $("#categoryDropdown").val(), // Get the selected category ID
+                productName: $("#productName").val(),
+                weight: $("#weight").val(),
+                unitPrice: $("#unitPrice").val(),
+                unitInStock: $("#unitInStock").val()
+            };
+
+            $.ajax({
+                url: "https://localhost:5001/api/Product",
+                type: "post",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (result, status, xhr) {
+                    // Handle the success, e.g., add the new product to the table
+                    window.location.href = "https://localhost:5002/Product";
+                    ShowAllProducts();
+                    // Clear the form fields
+                    $("#categoryDropdown").val(""); // Reset category selection
+                    $("#productName").val("");
+                    $("#weight").val("");
+                    $("#unitPrice").val("");
+                    $("#unitInStock").val("");
+
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                    alert("Error creating the product.");
+                }
+            });
+        });
+    });
+
+</script>
